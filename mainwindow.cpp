@@ -10,17 +10,23 @@
 #include <vector>
 #include <cstring>
 #include <string.h>
-
+#include "FichierModel.h"
+#include "QSortFilterProxyModel"
+#include <thread>
+#include <QDesktopServices>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->frameSearch->setVisible(false);
 
     connect(ui->btnChooseFolder, SIGNAL (released()), this, SLOT (btnChooseFolder_OnClick()));
     connect(ui->btnIndexFiles, SIGNAL (released()), this, SLOT (btnIndexFiles_OnClick()));
-    connect(ui->btnSearch, SIGNAL (released()), this, SLOT (btnSearchFiles_OnClick();));
+    connect(ui->btnSearch, SIGNAL (released()), this, SLOT (btnSearchFiles_OnClick()));
+    connect(ui->tableResult, SIGNAL(cellClicked(int,int)), this, SLOT(TableResult_OnCellClicked(int,int)));
+
 }
 
 MainWindow::~MainWindow()
@@ -62,9 +68,14 @@ int getdir (string dir, vector<Fichier> &files)
         string name(dirp->d_name);
         if (name != "." && name != "..") {
             Fichier fichier(dir+"/", name);
-            files.push_back(fichier);
+
             if (dirp->d_type == DT_DIR) {
                 getdir(fichier.GetPath(),files);
+            }
+            else
+            {
+                // on insert seulement les fichiers
+                files.push_back(fichier);
             }
         }
     }
@@ -78,36 +89,79 @@ void MainWindow::btnIndexFiles_OnClick()
     string path = fileName.toStdString();
     vector<Fichier> files = vector<Fichier>();
     BinaryTreeFichier *tree = this->bin;
-    QStandardItemModel *model = new QStandardItemModel(1, 1, this);
 
-    time_t before = time(0);
+    time_t start,end;
+    time (&start);
 
-  // remplissage d'un vecteur contenant les fichiers du dossier et sous-dossiers.
-  getdir(path, files);
+    // remplissage d'un vecteur contenant les fichiers du dossier et sous-dossiers.
+    getdir(path, files);
 
-  int cpt=-1;
-  int size = files.size();
-  for(Fichier f : files)
-  {
-      tree->Inserer(f);
-      ui->progressBar->setValue(cpt++/size*100);
-  }
-  ui->progressBar->setValue(100);
+    int cpt=-1;
+    int size = files.size();
+    for(Fichier f : files)
+    {
+        tree->Inserer(f);
+        ui->progressBar->setValue(cpt++/size*100);
+    }
+    ui->progressBar->setValue(100);
 
-  time_t after = time(0);
+    time (&end);
+    double duration = difftime (end,start);
 
-  ui->lblNbIndexesFiles->setText(cpt + " indexed files!");
+    std:string str = std::to_string(cpt);
+    QString qstr = QString::fromStdString(str.append(" indexed file in ").append(std::to_string(duration).append(" secs.")));
+    ui->lblNbIndexesFiles->setText(qstr);
+    ui->frameSearch->setVisible(true);
 }
 
 void MainWindow::btnSearchFiles_OnClick()
 {
-      vector<Fichier> files = vector<Fichier>();
-      BinaryTreeFichier* tree = this->bin;
-      string nom_fichier = ui->txtSearchFile->toPlainText().toStdString();
+    QTableWidget* m_pTableWidget = ui->tableResult;
+    QStringList m_TableHeader;
+    FichierModel m_model;
 
-        Fichier f = tree->Rechercher(nom_fichier);
+    BinaryTreeFichier* tree = this->bin;
+    string nom_fichier = ui->txtSearchFile->toPlainText().toStdString();
 
-        QStandardItem *item = new QStandardItem(QString::fromStdString(f.GetNomFichier()));
-        QStandardItemModel *model = new QStandardItemModel(1, 1, this);
-        model->setItem(1, 0, item);
+
+    tree->RechercherFichier(nom_fichier, this->vec, false);
+
+    m_pTableWidget->setRowCount(this->vec->size());
+    m_pTableWidget->setColumnCount(3);
+    m_TableHeader<<"Fichier"<<"Dossier"<<"";
+    m_pTableWidget->setHorizontalHeaderLabels(m_TableHeader);
+    m_pTableWidget->verticalHeader()->setVisible(false);
+    m_pTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_pTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_pTableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_pTableWidget->setShowGrid(false);
+
+    if(this->vec->size() > 0)
+    {
+        for(std::vector<Fichier>::size_type i = 0; i != this->vec->size(); i++) {
+            Fichier fich = this->vec->at(i);
+            m_pTableWidget->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(fich.GetNomFichier())));
+            m_pTableWidget->setItem(i, 1, new QTableWidgetItem(QString::fromStdString(fich.GetDossier())));
+            m_pTableWidget->setItem(i, 2, new QTableWidgetItem(QString::fromStdString("")));
+        }
+
+        std:string str = std::to_string(this->vec->size());
+        QString qstr = QString::fromStdString(str.append(" files found!"));
+        ui->lblNoSearchFound->setText(qstr);
+    }
+    else
+    {
+        QString qstr = QString::fromStdString("Aucun fichier trouvé.");
+        ui->lblNoSearchFound->setText(qstr);
+    }
+}
+
+
+void MainWindow::TableResult_OnCellClicked(int row, int col)
+{
+    QTableWidgetItem * item = ui->tableResult->item(row, col);
+
+    QString path = item->text();
+
+    QDesktopServices::openUrl(path);
 }

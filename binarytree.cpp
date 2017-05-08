@@ -12,7 +12,7 @@ void BinaryTreeFichier::Inserer(Fichier f)
       pere = actuel;
 
       //Aller dans le sous-arbre de droite ou gauche selon le cas
-      if (f > actuel->fichier) actuel = actuel->droite;
+      if (f >= actuel->fichier) actuel = actuel->droite;
       else if (f < actuel->fichier) actuel = actuel->gauche;
    }
 
@@ -24,7 +24,7 @@ void BinaryTreeFichier::Inserer(Fichier f)
    // Si donnee < noeud pere, insertion a gauche
    else if(f < pere->fichier) pere->gauche = new Noeud(f);
    // Si donnee < noeud pere, insertion a droite
-   else if(f > pere->fichier) pere->droite = new Noeud(f);
+   else if(f >= pere->fichier) pere->droite = new Noeud(f);
 }
 
 // Insertion trier par fichier
@@ -52,6 +52,8 @@ void BinaryTreeFichier::InsererFichier(Fichier f)
    else if(f.GetNomFichier() < pere->fichier.GetNomFichier()) pere->gauche = new Noeud(f);
    // Si donnee < noeud pere, insertion a droite
    else if(f.GetNomFichier() > pere->fichier.GetNomFichier()) pere->droite = new Noeud(f);
+
+   size++;
 }
 
 // Effacer
@@ -78,9 +80,13 @@ void BinaryTreeFichier::Effacer(Fichier f)
                }
                else
                {
-                   if(pere->gauche == actuel) pere->gauche = NULL;
+                   if(pere->gauche == actuel)
+                   {
+                       pere->gauche = NULL;
+                   }
                }
             delete actuel; 	// Effacer le noeud
+            size--;
             actuel = NULL;
             return;
          }
@@ -124,17 +130,33 @@ void BinaryTreeFichier::Effacer(Fichier f)
 }
 
 // Chercher un fichier par son nom
-Fichier BinaryTreeFichier::Rechercher(string nom)
+void BinaryTreeFichier::RechercherFichier(string nom, vector<Fichier> * vec, bool firstOnly)
 {
+    vec->clear();
+    vector<Fichier> results = vector<Fichier>();
+    vector<Fichier> *r = &results;
     actuel = racine;
 
     while(!Vide(actuel))
     {
-       if(nom == actuel->fichier.GetNomFichier()) return actuel->fichier;
-       else if(nom > actuel->fichier.GetNomFichier()) actuel = actuel->droite;
-       else if(nom < actuel->fichier.GetNomFichier()) actuel = actuel->gauche;
+        string f1=nom;
+        string f2 = actuel->fichier.GetNomFichier();
+        if(f2.find(f1) != std::string::npos)
+        {
+            vec->push_back(actuel->fichier);
+            if(firstOnly)
+            {
+                break;
+            }
+            else
+            {
+                actuel = actuel->droite;
+                continue;
+            }
+        }
+        else if(f1 >= f2) actuel = actuel->droite;
+        else if(f1 < f2) actuel = actuel->gauche;
     }
-    return Fichier();
 }
 
 // Calculer la longueur du noeud qui contient la donnee
@@ -190,6 +212,11 @@ void BinaryTreeFichier::auxHauteur(Noeud *noeud, int a)
    //
    //
    if(EstFeuille(noeud) && a > hauteur) hauteur = a;
+}
+
+void BinaryTreeFichier::FillVector(vector<Fichier> &vec, Noeud *noeud, bool r)
+{
+    return;
 }
 
 void Affiche(int &d)

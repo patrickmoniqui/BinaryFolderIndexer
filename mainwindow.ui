@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QPushButton" name="btnChooseFolder">
     <property name="geometry">
@@ -72,9 +75,9 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>270</x>
       <y>70</y>
-      <width>101</width>
+      <width>91</width>
       <height>51</height>
      </rect>
     </property>
@@ -82,7 +85,7 @@
      <string>Index files!</string>
     </property>
    </widget>
-   <widget class="QFrame" name="frame">
+   <widget class="QFrame" name="frameSearch">
     <property name="enabled">
      <bool>true</bool>
     </property>
@@ -123,26 +126,6 @@
       <string>Search terms:</string>
      </property>
     </widget>
-    <widget class="QListView" name="listViewResult">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>70</y>
-       <width>281</width>
-       <height>231</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QTreeView" name="treeView">
-     <property name="geometry">
-      <rect>
-       <x>320</x>
-       <y>70</y>
-       <width>271</width>
-       <height>231</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QPushButton" name="btnSearch">
      <property name="geometry">
       <rect>
@@ -154,6 +137,29 @@
      </property>
      <property name="text">
       <string>GO</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="lblNoSearchFound">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>40</y>
+       <width>401</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="tableResult">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>581</width>
+       <height>241</height>
+      </rect>
      </property>
     </widget>
    </widget>

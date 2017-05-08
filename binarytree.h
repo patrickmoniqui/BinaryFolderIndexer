@@ -23,19 +23,19 @@ public:
         return dossier+nom_fichier;
     }
 
-    string GetDossier()
+    string GetDossier() const
     {
         return dossier;
     }
 
-    string GetNomFichier()
+    string GetNomFichier() const
     {
         return nom_fichier;
     }
 
     friend bool operator< (const Fichier & f1, const Fichier & f2)
     {
-        if(f1.GetPath() < f2.GetPath())
+        if(f1.GetNomFichier() < f2.GetNomFichier())
             return true;
         else
             return false;
@@ -43,7 +43,15 @@ public:
 
     friend bool operator> (const Fichier & f1, const Fichier & f2)
     {
-        if(f1.GetPath() > f2.GetPath())
+        if(f1.GetNomFichier() > f2.GetNomFichier())
+            return true;
+        else
+            return false;
+    }
+
+    friend bool operator>= (const Fichier & f1, const Fichier & f2)
+    {
+        if(f1.GetNomFichier() >= f2.GetNomFichier())
             return true;
         else
             return false;
@@ -88,9 +96,10 @@ class BinaryTreeFichier
    Noeud *actuel;
    int compteur;
    int hauteur;
+   int size;
 
   public:
-   BinaryTreeFichier() : racine(NULL), actuel(NULL) {}
+   BinaryTreeFichier() : racine(NULL), actuel(NULL), size(0) {}
 
    void Inserer(Fichier ficher);     	// Insertion
 
@@ -98,7 +107,7 @@ class BinaryTreeFichier
 
    void Effacer(Fichier ficher);	// Supprimer une donnes de l'arbre
 
-   Fichier Rechercher(string fichier);	// Rechercher
+   void RechercherFichier(string fichier, vector<Fichier> *, bool firstOnly);	// Rechercher
 
    bool Vide(Noeud *r) { return r==NULL; }    // Arbre vide
 
@@ -120,6 +129,13 @@ class BinaryTreeFichier
    void PostFixe(void (*func)(Fichier&), Noeud *noeud=NULL, bool r=true);
 
    void ParcoursEnLargeur();
+
+   void FillVector(vector<Fichier> &vec, Noeud *noeud=NULL, bool r=true);
+
+   int GetSize() const
+   {
+       return size;
+   }
 
   private:
    // Fonctions auxiliaires

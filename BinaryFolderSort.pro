@@ -28,6 +28,7 @@ SOURCES += main.cpp\
     binarytree.cpp
 
 HEADERS  += mainwindow.h \
-    binarytree.h
+    binarytree.h \
+    fichiermodel.h
 
 FORMS    += mainwindow.ui
