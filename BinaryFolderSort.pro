@@ -32,3 +32,9 @@ HEADERS  += mainwindow.h \
     fichiermodel.h
 
 FORMS    += mainwindow.ui
+
+DISTFILES +=
+
+RESOURCES += \
+    styles.qrc \
+    images.qrc

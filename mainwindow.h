@@ -18,12 +18,13 @@ public:
     BinaryTreeFichier *bin = &b;
     vector<Fichier> v = vector<Fichier>();
     vector<Fichier> *vec = &v;
+    void IndexFolder(string path);
+    int getdir (string dir, vector<Fichier> *files);
 
     ~MainWindow();
 
     private slots:
     void btnChooseFolder_OnClick();
-    void btnIndexFiles_OnClick();
     void btnSearchFiles_OnClick();
     void TableResult_OnCellClicked(int row,int col);
 
