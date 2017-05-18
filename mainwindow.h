@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "binarytree.h"
+#include "QThread"
 
 namespace Ui {
 class MainWindow;

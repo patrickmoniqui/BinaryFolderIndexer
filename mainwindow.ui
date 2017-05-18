@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Binary Tree Folder Search</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -69,8 +69,14 @@
        </item>
        <item row="1" column="2">
         <widget class="QPushButton" name="btnSearch">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Search</string>
+         </property>
+         <property name="autoDefault">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -203,7 +209,7 @@
        <widget class="QLabel" name="lblLogo">
         <property name="minimumSize">
          <size>
-          <width>10</width>
+          <width>0</width>
           <height>0</height>
          </size>
         </property>

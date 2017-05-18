@@ -12,31 +12,29 @@
 #include <string.h>
 #include "FichierModel.h"
 #include "QSortFilterProxyModel"
-#include <thread>
+#include "QThread"
 #include <QDesktopServices>
 #include <iomanip> // setprecision
 #include <sstream> // stringstream
+#include "QObject"
 
-using namespace  std ;
-
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+using namespace  std;
+//
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-
-
     connect(ui->btnChooseFolder, SIGNAL (released()), this, SLOT (btnChooseFolder_OnClick()));
-    //connect(ui->btnIndexFiles, SIGNAL (released()), this, SLOT (btnIndexFiles_OnClick()));
     connect(ui->btnSearch, SIGNAL (released()), this, SLOT (btnSearchFiles_OnClick()));
     connect(ui->tableResult, SIGNAL(cellClicked(int,int)), this, SLOT(TableResult_OnCellClicked(int,int)));
 
+    //Mettre le logo de l'application en background d'un label
     QPixmap pix(":/splash_screen.png");
     ui->lblLogo->setPixmap(pix);
     ui->lblLogo->setScaledContents(true);
 }
 
+// Function qui rempli l'arbre binaire
 void MainWindow::IndexFolder(string path)
 {
     vector<Fichier> files = vector<Fichier>();
@@ -71,11 +69,13 @@ void MainWindow::IndexFolder(string path)
     ui->frameSearch->setVisible(true);
 }
 
+// Destruction de la fenêtre
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+// Événement OnPressed du bouton 'Choose Folder'
 void MainWindow::btnChooseFolder_OnClick()
 {
     QFileDialog dialog;
@@ -90,18 +90,20 @@ void MainWindow::btnChooseFolder_OnClick()
     {
         ui->lblNbIndexesFiles->setText("Indexing...");
 
-        std::thread t1(&MainWindow::IndexFolder, this, dir.toStdString());
-        t1.join();
+        //Indexation des fichiers
+        IndexFolder(dir.toStdString());
 
-        //ui->btnIndexFiles->setEnabled(true);
+        this->vec->clear();
+
+        ui->btnSearch->setEnabled(true);
     }
     else
     {
-        //ui->btnIndexFiles->setEnabled(false);
+       ui->btnSearch->setEnabled(false);
     }
-
 }
 
+// Fonction qui rempli un vecteur contenant tous les fichiers et sous-fichiers à partir du nom de dossier
 int MainWindow::getdir(string dir, vector<Fichier> *files)
 {
     DIR *dp;
@@ -114,6 +116,8 @@ int MainWindow::getdir(string dir, vector<Fichier> *files)
     while ((dirp = readdir(dp)) != NULL) {
         string name(dirp->d_name);
         if (name != "." && name != "..") {
+            //nom du fichier tolower
+            //std::transform(name.begin(), name.end(), name.begin(), ::tolower);
             Fichier fichier(dir+"/", name);
 
             if (dirp->d_type == DT_DIR) {
@@ -130,6 +134,7 @@ int MainWindow::getdir(string dir, vector<Fichier> *files)
     return 0;
 }
 
+// Événement OnPressed du bouton Search
 void MainWindow::btnSearchFiles_OnClick()
 {
     QTableWidget* m_pTableWidget = ui->tableResult;
@@ -139,8 +144,7 @@ void MainWindow::btnSearchFiles_OnClick()
     BinaryTreeFichier* tree = this->bin;
     string nom_fichier = ui->txtSearchFile->toPlainText().toStdString();
 
-
-    tree->RechercherFichier(nom_fichier, this->vec, false);
+    tree->RechercherFichier(nom_fichier, this->vec, true);
 
     m_pTableWidget->setRowCount(this->vec->size());
     m_pTableWidget->setColumnCount(2);
@@ -173,12 +177,20 @@ void MainWindow::btnSearchFiles_OnClick()
     }
 }
 
+//Événement OnCellClick de la table de résultat
 void MainWindow::TableResult_OnCellClicked(int row, int col)
 {
-    QTableWidgetItem * item = ui->tableResult->item(row, col);
+    // En cliquant sur l'item, il sera ouvert par le programme associé à l'extension (EX: Notepad avec les fichiers *.txt)
+    QString path = ui->tableResult->item(row, 1)->text() + ui->tableResult->item(row, 0)->text();
+    string command;
+    QString OSVersion = QSysInfo::productType(); // Vérifie la version
+    if(OSVersion == ("windows"))
+    {
 
-    QString path = item->text();
-
-    QDesktopServices::openUrl(path);
+    }
+    else if (OSVersion == ("macos") || OSVersion == "osx"){
+        // Selon la documentation en ligne, Le open est la meilleur solution.
+        command = "open '" + path.toStdString() + "'";
+    }
+    system(command.c_str());
 }
-

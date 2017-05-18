@@ -136,12 +136,12 @@ void BinaryTreeFichier::RechercherFichier(string nom, vector<Fichier> * vec, boo
     vector<Fichier> results = vector<Fichier>();
     vector<Fichier> *r = &results;
     actuel = racine;
+    string f1=nom;
 
-    while(!Vide(actuel))
+    while(!Vide(actuel) && nom != "")
     {
-        string f1=nom;
         string f2 = actuel->fichier.GetNomFichier();
-        if(f2.find(f1) != std::string::npos)
+        if (f2.compare(0, f1.length(), f1) == 0)
         {
             vec->push_back(actuel->fichier);
             if(firstOnly)
